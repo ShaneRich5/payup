@@ -5,6 +5,20 @@ export interface User {
     email_verified_at?: string;
 }
 
+export interface PaymentAccount {
+    id: number;
+    owner_id: number;
+    handle: string;
+    type: 'bank' | 'card' | 'wallet' | 'crypto';
+    name?: string;
+    description?: string;
+    status: 'active' | 'inactive' | 'suspended';
+    metadata?: Record<string, any>;
+    created_at: string;
+    updated_at: string;
+    owner?: User;
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
