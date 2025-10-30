@@ -9,7 +9,7 @@ export interface PaymentAccount {
     id: number;
     owner_id: number;
     handle: string;
-    type: 'bank' | 'card' | 'wallet' | 'crypto';
+    type: 'venmo' | 'zelle' | 'paypal' | 'cash_app';
     name?: string;
     description?: string;
     status: 'active' | 'inactive' | 'suspended';

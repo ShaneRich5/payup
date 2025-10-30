@@ -76,7 +76,7 @@ export default function Edit({ auth, paymentAccount }: PaymentAccountEditProps) 
                   className="mt-1 block w-full"
                   value={data.handle}
                   onChange={(e) => setData('handle', e.target.value)}
-                  placeholder="e.g., my-bank-account"
+                  placeholder="e.g., @username or phone-number"
                   required
                 />
                 <InputError message={errors.handle} className="mt-2" />
@@ -91,10 +91,10 @@ export default function Edit({ auth, paymentAccount }: PaymentAccountEditProps) 
                   value={data.type}
                   onChange={(e) => setData('type', e.target.value as any)}
                 >
-                  <option value="bank">Bank Account</option>
-                  <option value="card">Credit/Debit Card</option>
-                  <option value="wallet">Digital Wallet</option>
-                  <option value="crypto">Cryptocurrency</option>
+                  <option value="venmo">Venmo</option>
+                  <option value="zelle">Zelle</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="cash_app">Cash App</option>
                 </select>
                 <InputError message={errors.type} className="mt-2" />
               </div>
@@ -108,7 +108,7 @@ export default function Edit({ auth, paymentAccount }: PaymentAccountEditProps) 
                   className="mt-1 block w-full"
                   value={data.name}
                   onChange={(e) => setData('name', e.target.value)}
-                  placeholder="e.g., My Primary Bank Account"
+                  placeholder="e.g., My Personal Venmo"
                 />
                 <InputError message={errors.name} className="mt-2" />
               </div>

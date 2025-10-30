@@ -28,16 +28,31 @@ export default function Show({ auth, paymentAccount }: PaymentAccountShowProps) 
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'bank':
+      case 'venmo':
+        return '💙';
+      case 'zelle':
         return '🏦';
-      case 'card':
-        return '💳';
-      case 'wallet':
-        return '👛';
-      case 'crypto':
-        return '₿';
+      case 'paypal':
+        return '💙';
+      case 'cash_app':
+        return '💚';
       default:
         return '💰';
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'venmo':
+        return 'Venmo';
+      case 'zelle':
+        return 'Zelle';
+      case 'paypal':
+        return 'PayPal';
+      case 'cash_app':
+        return 'Cash App';
+      default:
+        return type;
     }
   };
 
@@ -94,8 +109,8 @@ export default function Show({ auth, paymentAccount }: PaymentAccountShowProps) 
                     <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       Type
                     </dt>
-                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 capitalize">
-                      {paymentAccount.type}
+                    <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                      {getTypeLabel(paymentAccount.type)}
                     </dd>
                   </div>
 

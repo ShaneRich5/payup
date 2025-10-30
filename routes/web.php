@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\PaymentAccountType;
 use App\Http\Controllers\ProfileController;
 use App\Models\PaymentAccount;
 use Illuminate\Foundation\Application;
@@ -40,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/payment-accounts', function (Request $request) {
         $validated = $request->validate([
             'handle' => 'required|string|max:255|unique:payment_accounts,handle',
-            'type' => 'required|in:bank,card,wallet,crypto',
+            'type' => 'required|in:venmo,zelle,paypal,cash_app',
             'name' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
             'status' => 'required|in:active,inactive,suspended',
@@ -82,7 +83,7 @@ Route::middleware('auth')->group(function () {
 
         $validated = $request->validate([
             'handle' => 'required|string|max:255|unique:payment_accounts,handle,' . $paymentAccount->id,
-            'type' => 'required|in:bank,card,wallet,crypto',
+            'type' => 'required|in:venmo,zelle,paypal,cash_app',
             'name' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:1000',
             'status' => 'required|in:active,inactive,suspended',

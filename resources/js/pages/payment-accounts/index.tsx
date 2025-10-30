@@ -33,16 +33,31 @@ export default function Index({ auth, paymentAccounts }: PaymentAccountsIndexPro
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'bank':
+      case 'venmo':
+        return '💙';
+      case 'zelle':
         return '🏦';
-      case 'card':
-        return '💳';
-      case 'wallet':
-        return '👛';
-      case 'crypto':
-        return '₿';
+      case 'paypal':
+        return '💙';
+      case 'cash_app':
+        return '💚';
       default:
         return '💰';
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'venmo':
+        return 'Venmo';
+      case 'zelle':
+        return 'Zelle';
+      case 'paypal':
+        return 'PayPal';
+      case 'cash_app':
+        return 'Cash App';
+      default:
+        return type;
     }
   };
 
@@ -128,7 +143,7 @@ export default function Index({ auth, paymentAccounts }: PaymentAccountsIndexPro
                       )}
 
                       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3">
-                        <span className="capitalize">{account.type}</span>
+                        <span>{getTypeLabel(account.type)}</span>
                         <span>
                           Created {new Date(account.created_at).toLocaleDateString()}
                         </span>
