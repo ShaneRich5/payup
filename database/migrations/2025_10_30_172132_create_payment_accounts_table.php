@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('payment_accounts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('owner_id')->constrained('users')->onDeleteCascade();
+            $table->string('handle');
+            $table->string('type');
+            $table->string('name')->nullable();
+            $table->string('description')->nullable();
+            $table->string('status')->default('active');
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }
