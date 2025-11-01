@@ -204,4 +204,61 @@ Route::middleware('auth')->group(function () {
     })->name('payment-requests.destroy');
 });
 
+// Vanity Routes (Public)
+Route::get('/pay/{handle}', function (string $handle) {
+    // Find payment account by handle to get the owner
+    $paymentAccount = PaymentAccount::where('handle', $handle)
+        ->where('status', 'active')
+        ->with('owner')
+        ->first();
+
+    if (!$paymentAccount) {
+        abort(404, 'Payment account not found');
+    }
+
+    $owner = $paymentAccount->owner;
+
+    // Get all active payment accounts for this owner
+    $paymentAccounts = PaymentAccount::where('owner_id', $owner->id)
+        ->where('status', 'active')
+        ->get();
+
+    return Inertia::render('pay/index', [
+        'owner' => $owner,
+        'paymentAccounts' => $paymentAccounts,
+    ]);
+})->name('pay.index');
+
+Route::get('/pay/{handle}/{token}', function (string $handle, string $token) {
+    // Find payment request by token
+    $paymentRequest = PaymentRequest::where('token', $token)
+        ->with('owner')
+        ->first();
+
+    if (!$paymentRequest) {
+        abort(404, 'Payment request not found');
+    }
+
+    // Verify the handle matches one of the owner's payment accounts
+    $paymentAccount = PaymentAccount::where('handle', $handle)
+        ->where('owner_id', $paymentRequest->owner_id)
+        ->where('status', 'active')
+        ->first();
+
+    if (!$paymentAccount) {
+        abort(404, 'Payment account not found for this user');
+    }
+
+    // Get all active payment accounts for the owner
+    $paymentAccounts = PaymentAccount::where('owner_id', $paymentRequest->owner_id)
+        ->where('status', 'active')
+        ->get();
+
+    return Inertia::render('pay/show', [
+        'owner' => $paymentRequest->owner,
+        'paymentRequest' => $paymentRequest,
+        'paymentAccounts' => $paymentAccounts,
+    ]);
+})->name('pay.show');
+
 require __DIR__ . '/auth.php';
