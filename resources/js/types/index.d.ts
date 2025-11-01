@@ -22,7 +22,6 @@ export interface PaymentAccount {
 export interface PaymentRequest {
     id: number;
     uuid: string;
-    payment_account_id: number;
     owner_id: number;
     title?: string;
     description?: string;
@@ -35,7 +34,6 @@ export interface PaymentRequest {
     metadata?: Record<string, any>;
     created_at: string;
     updated_at: string;
-    payment_account?: PaymentAccount;
     owner?: User;
 }
 

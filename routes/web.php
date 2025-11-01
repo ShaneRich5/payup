@@ -112,21 +112,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment-requests', function () {
         return Inertia::render('payment-requests/index', [
             'paymentRequests' => PaymentRequest::where('owner_id', Auth::id())
-                ->with('paymentAccount')
+                ->with('owner')
                 ->orderBy('created_at', 'desc')
                 ->get()
         ]);
     })->name('payment-requests.index');
 
     Route::get('/payment-requests/create', function () {
-        return Inertia::render('payment-requests/create', [
-            'paymentAccounts' => PaymentAccount::where('owner_id', Auth::id())->where('status', 'active')->get()
-        ]);
+        return Inertia::render('payment-requests/create');
     })->name('payment-requests.create');
 
     Route::post('/payment-requests', function (Request $request) {
         $validated = $request->validate([
-            'payment_account_id' => 'required|exists:payment_accounts,id',
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'currency' => 'required|string|size:3',
@@ -135,12 +132,6 @@ Route::middleware('auth')->group(function () {
             'expires_at' => 'nullable|date',
             'metadata' => 'nullable|array',
         ]);
-
-        // Verify payment account belongs to user
-        $paymentAccount = PaymentAccount::findOrFail($validated['payment_account_id']);
-        if ($paymentAccount->owner_id !== Auth::id()) {
-            abort(403);
-        }
 
         $validated['owner_id'] = Auth::id();
 
@@ -156,7 +147,10 @@ Route::middleware('auth')->group(function () {
         }
 
         return Inertia::render('payment-requests/show', [
-            'paymentRequest' => $paymentRequest->load('paymentAccount')
+            'paymentRequest' => $paymentRequest->load('owner'),
+            'paymentAccounts' => PaymentAccount::where('owner_id', $paymentRequest->owner_id)
+                ->where('status', 'active')
+                ->get()
         ]);
     })->name('payment-requests.show');
 
@@ -166,8 +160,7 @@ Route::middleware('auth')->group(function () {
         }
 
         return Inertia::render('payment-requests/edit', [
-            'paymentRequest' => $paymentRequest->load('paymentAccount'),
-            'paymentAccounts' => PaymentAccount::where('owner_id', Auth::id())->where('status', 'active')->get()
+            'paymentRequest' => $paymentRequest->load('owner')
         ]);
     })->name('payment-requests.edit');
 
@@ -177,7 +170,6 @@ Route::middleware('auth')->group(function () {
         }
 
         $validated = $request->validate([
-            'payment_account_id' => 'required|exists:payment_accounts,id',
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'currency' => 'required|string|size:3',
@@ -186,12 +178,6 @@ Route::middleware('auth')->group(function () {
             'expires_at' => 'nullable|date',
             'metadata' => 'nullable|array',
         ]);
-
-        // Verify payment account belongs to user
-        $paymentAccount = PaymentAccount::findOrFail($validated['payment_account_id']);
-        if ($paymentAccount->owner_id !== Auth::id()) {
-            abort(403);
-        }
 
         // Set paid_at when status changes to paid
         if ($validated['status'] === 'paid' && $paymentRequest->status !== 'paid') {

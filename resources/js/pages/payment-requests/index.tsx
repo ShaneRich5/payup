@@ -144,11 +144,6 @@ export default function Index({ auth, paymentRequests }: PaymentRequestsIndexPro
                             <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                               {formatCurrency(request.amount, request.currency)}
                             </div>
-                            {request.payment_account && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                via {request.payment_account.name || request.payment_account.handle}
-                              </div>
-                            )}
                           </div>
 
                           {/* Details */}

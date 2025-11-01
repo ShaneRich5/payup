@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
-import { PageProps, PaymentRequest, PaymentAccount } from '@/types';
+import { PageProps, PaymentRequest } from '@/types';
 import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
 import InputLabel from '@/components/InputLabel';
@@ -9,12 +9,10 @@ import InputError from '@/components/InputError';
 
 interface PaymentRequestEditProps extends PageProps {
   paymentRequest: PaymentRequest;
-  paymentAccounts: Array<PaymentAccount>;
 }
 
-export default function Edit({ auth, paymentRequest, paymentAccounts }: PaymentRequestEditProps) {
+export default function Edit({ auth, paymentRequest }: PaymentRequestEditProps) {
   const { data, setData, put, processing, errors, reset } = useForm({
-    payment_account_id: paymentRequest.payment_account_id.toString(),
     title: paymentRequest.title || '',
     description: paymentRequest.description || '',
     currency: paymentRequest.currency,
@@ -70,26 +68,6 @@ export default function Edit({ auth, paymentRequest, paymentAccounts }: PaymentR
         <div className="mx-auto max-w-2xl sm:px-6 lg:px-8">
           <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
             <form onSubmit={submit} className="p-6 space-y-6">
-              {/* Payment Account */}
-              <div>
-                <InputLabel htmlFor="payment_account_id" value="Payment Account" />
-                <select
-                  id="payment_account_id"
-                  className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
-                  value={data.payment_account_id}
-                  onChange={(e) => setData('payment_account_id', e.target.value)}
-                  required
-                >
-                  <option value="">Select a payment account...</option>
-                  {paymentAccounts.map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {account.name || account.handle} ({account.type})
-                    </option>
-                  ))}
-                </select>
-                <InputError message={errors.payment_account_id} className="mt-2" />
-              </div>
-
               {/* Title */}
               <div>
                 <InputLabel htmlFor="title" value="Title (Optional)" />

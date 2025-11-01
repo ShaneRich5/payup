@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,7 +29,6 @@ class PaymentRequest extends Model
 
     protected $fillable = [
         'uuid',
-        'payment_account_id',
         'owner_id',
         'title',
         'description',
@@ -45,8 +45,11 @@ class PaymentRequest extends Model
         'metadata' => 'array',
     ];
 
-    public function paymentAccount(): BelongsTo
+    /**
+     * @return BelongsTo<User>
+     */
+    public function owner(): BelongsTo
     {
-        return $this->belongsTo(PaymentAccount::class);
+        return $this->belongsTo(User::class, 'owner_id');
     }
 }

@@ -1,19 +1,16 @@
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
-import { PageProps, PaymentAccount } from '@/types';
+import { PageProps } from '@/types';
 import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
 import InputLabel from '@/components/InputLabel';
 import TextInput from '@/components/TextInput';
 import InputError from '@/components/InputError';
 
-interface PaymentRequestCreateProps extends PageProps {
-  paymentAccounts: Array<PaymentAccount>;
-}
+interface PaymentRequestCreateProps extends PageProps { }
 
-export default function Create({ auth, paymentAccounts }: PaymentRequestCreateProps) {
+export default function Create({ auth }: PaymentRequestCreateProps) {
   const { data, setData, post, processing, errors, reset } = useForm({
-    payment_account_id: '',
     title: '',
     description: '',
     currency: 'USD',
@@ -79,31 +76,6 @@ export default function Create({ auth, paymentAccounts }: PaymentRequestCreatePr
         <div className="mx-auto max-w-2xl sm:px-6 lg:px-8">
           <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
             <form onSubmit={submit} className="p-6 space-y-6">
-              {/* Payment Account */}
-              <div>
-                <InputLabel htmlFor="payment_account_id" value="Payment Account" />
-                <select
-                  id="payment_account_id"
-                  className="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
-                  value={data.payment_account_id}
-                  onChange={(e) => setData('payment_account_id', e.target.value)}
-                  required
-                >
-                  <option value="">Select a payment account...</option>
-                  {paymentAccounts.map((account) => (
-                    <option key={account.id} value={account.id}>
-                      {account.name || account.handle} ({account.type})
-                    </option>
-                  ))}
-                </select>
-                <InputError message={errors.payment_account_id} className="mt-2" />
-                {paymentAccounts.length === 0 && (
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    No payment accounts available. <a href="/payment-accounts/create" className="text-blue-600 hover:text-blue-500 dark:text-blue-400">Create one first</a>.
-                  </p>
-                )}
-              </div>
-
               {/* Title */}
               <div>
                 <InputLabel htmlFor="title" value="Title (Optional)" />

@@ -1,15 +1,16 @@
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { PageProps, PaymentRequest } from '@/types';
+import { PageProps, PaymentRequest, PaymentAccount } from '@/types';
 import PrimaryButton from '@/components/PrimaryButton';
 import DangerButton from '@/components/DangerButton';
 import { useState } from 'react';
 
 interface PaymentRequestShowProps extends PageProps {
   paymentRequest: PaymentRequest;
+  paymentAccounts: Array<PaymentAccount>;
 }
 
-export default function Show({ auth, paymentRequest }: PaymentRequestShowProps) {
+export default function Show({ auth, paymentRequest, paymentAccounts }: PaymentRequestShowProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const getStatusBadge = (status: string) => {
@@ -124,22 +125,6 @@ export default function Show({ auth, paymentRequest }: PaymentRequestShowProps) 
                   </div>
                 )}
 
-                {/* Payment Account */}
-                {paymentRequest.payment_account && (
-                  <div className="mb-6">
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                      Payment Account
-                    </dt>
-                    <dd className="text-sm text-gray-900 dark:text-gray-100">
-                      <Link
-                        href={`/payment-accounts/${paymentRequest.payment_account.id}`}
-                        className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        {paymentRequest.payment_account.name || paymentRequest.payment_account.handle}
-                      </Link>
-                    </dd>
-                  </div>
-                )}
 
                 {/* Token & Shareable Link */}
                 <div className="mb-6">
@@ -222,32 +207,95 @@ export default function Show({ auth, paymentRequest }: PaymentRequestShowProps) 
               </div>
             </div>
 
-            {/* Metadata Card */}
+            {/* Payment Accounts Card */}
             <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
               <div className="p-6">
                 <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                  Metadata
+                  Available Payment Accounts
                 </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  {paymentRequest.owner?.name || 'The requester'} has the following payment accounts available:
+                </p>
 
-                {paymentRequest.metadata && Object.keys(paymentRequest.metadata).length > 0 ? (
+                {paymentAccounts && paymentAccounts.length > 0 ? (
                   <div className="space-y-3">
-                    {Object.entries(paymentRequest.metadata).map(([key, value]) => (
-                      <div key={key} className="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">
-                        <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          {key}
-                        </dt>
-                        <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                          {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                        </dd>
-                      </div>
-                    ))}
+                    {paymentAccounts.filter(account => account.status === 'active').map((account) => {
+                      const getTypeIcon = (type: string) => {
+                        switch (type) {
+                          case 'venmo': return '💙';
+                          case 'zelle': return '🏦';
+                          case 'paypal': return '💙';
+                          case 'cash_app': return '💚';
+                          default: return '💰';
+                        }
+                      };
+
+                      const getTypeLabel = (type: string) => {
+                        switch (type) {
+                          case 'venmo': return 'Venmo';
+                          case 'zelle': return 'Zelle';
+                          case 'paypal': return 'PayPal';
+                          case 'cash_app': return 'Cash App';
+                          default: return type;
+                        }
+                      };
+
+                      return (
+                        <div key={account.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{getTypeIcon(account.type)}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                {account.name || account.handle}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                @{account.handle} • {getTypeLabel(account.type)}
+                              </div>
+                              {account.description && (
+                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                                  {account.description}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    No metadata available for this payment request.
+                    No active payment accounts available.
                   </p>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Metadata Card */}
+          <div className="mt-6 overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+            <div className="p-6">
+              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                Metadata
+              </h4>
+
+              {paymentRequest.metadata && Object.keys(paymentRequest.metadata).length > 0 ? (
+                <div className="space-y-3">
+                  {Object.entries(paymentRequest.metadata).map(([key, value]) => (
+                    <div key={key} className="border-b border-gray-200 dark:border-gray-700 pb-2 last:border-b-0">
+                      <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {key}
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                        {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                      </dd>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No metadata available for this payment request.
+                </p>
+              )}
             </div>
           </div>
 
