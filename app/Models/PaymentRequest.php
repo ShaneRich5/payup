@@ -14,7 +14,15 @@ class PaymentRequest extends Model
     protected static function booted()
     {
         static::creating(function ($model) {
-            $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+            if (empty($model->token)) {
+                do {
+                    $token = \Illuminate\Support\Str::random(64);
+                } while (static::where('token', $token)->exists());
+                $model->token = $token;
+            }
         });
     }
 
@@ -24,6 +32,13 @@ class PaymentRequest extends Model
         'owner_id',
         'title',
         'description',
+        'currency',
+        'amount',
+        'token',
+        'status',
+        'expires_at',
+        'paid_at',
+        'metadata',
     ];
 
     protected $casts = [

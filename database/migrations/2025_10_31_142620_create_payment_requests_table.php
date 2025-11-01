@@ -17,7 +17,6 @@ return new class extends Migration
 
             $table->uuid('uuid')->unique();
 
-            $table->foreignId('payment_account_id')->constrained()->cascadeOnDelete();
             $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
 
             $table->string('title')->nullable(); // e.g. “Dinner Bill” or “Project Payment”

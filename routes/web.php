@@ -3,6 +3,7 @@
 use App\Constants\PaymentAccountType;
 use App\Http\Controllers\ProfileController;
 use App\Models\PaymentAccount;
+use App\Models\PaymentRequest;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -106,6 +107,115 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('payment-accounts.index')
             ->with('success', 'Payment account deleted successfully.');
     })->name('payment-accounts.destroy');
+
+    // Payment Requests Routes
+    Route::get('/payment-requests', function () {
+        return Inertia::render('payment-requests/index', [
+            'paymentRequests' => PaymentRequest::where('owner_id', Auth::id())
+                ->with('paymentAccount')
+                ->orderBy('created_at', 'desc')
+                ->get()
+        ]);
+    })->name('payment-requests.index');
+
+    Route::get('/payment-requests/create', function () {
+        return Inertia::render('payment-requests/create', [
+            'paymentAccounts' => PaymentAccount::where('owner_id', Auth::id())->where('status', 'active')->get()
+        ]);
+    })->name('payment-requests.create');
+
+    Route::post('/payment-requests', function (Request $request) {
+        $validated = $request->validate([
+            'payment_account_id' => 'required|exists:payment_accounts,id',
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'currency' => 'required|string|size:3',
+            'amount' => 'required|numeric|min:0.01',
+            'status' => 'required|in:pending,paid,cancelled',
+            'expires_at' => 'nullable|date',
+            'metadata' => 'nullable|array',
+        ]);
+
+        // Verify payment account belongs to user
+        $paymentAccount = PaymentAccount::findOrFail($validated['payment_account_id']);
+        if ($paymentAccount->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated['owner_id'] = Auth::id();
+
+        PaymentRequest::create($validated);
+
+        return redirect()->route('payment-requests.index')
+            ->with('success', 'Payment request created successfully.');
+    })->name('payment-requests.store');
+
+    Route::get('/payment-requests/{paymentRequest}', function (PaymentRequest $paymentRequest) {
+        if ($paymentRequest->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return Inertia::render('payment-requests/show', [
+            'paymentRequest' => $paymentRequest->load('paymentAccount')
+        ]);
+    })->name('payment-requests.show');
+
+    Route::get('/payment-requests/{paymentRequest}/edit', function (PaymentRequest $paymentRequest) {
+        if ($paymentRequest->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return Inertia::render('payment-requests/edit', [
+            'paymentRequest' => $paymentRequest->load('paymentAccount'),
+            'paymentAccounts' => PaymentAccount::where('owner_id', Auth::id())->where('status', 'active')->get()
+        ]);
+    })->name('payment-requests.edit');
+
+    Route::put('/payment-requests/{paymentRequest}', function (Request $request, PaymentRequest $paymentRequest) {
+        if ($paymentRequest->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'payment_account_id' => 'required|exists:payment_accounts,id',
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'currency' => 'required|string|size:3',
+            'amount' => 'required|numeric|min:0.01',
+            'status' => 'required|in:pending,paid,cancelled',
+            'expires_at' => 'nullable|date',
+            'metadata' => 'nullable|array',
+        ]);
+
+        // Verify payment account belongs to user
+        $paymentAccount = PaymentAccount::findOrFail($validated['payment_account_id']);
+        if ($paymentAccount->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Set paid_at when status changes to paid
+        if ($validated['status'] === 'paid' && $paymentRequest->status !== 'paid') {
+            $validated['paid_at'] = now();
+        } elseif ($validated['status'] !== 'paid') {
+            $validated['paid_at'] = null;
+        }
+
+        $paymentRequest->update($validated);
+
+        return redirect()->route('payment-requests.show', $paymentRequest)
+            ->with('success', 'Payment request updated successfully.');
+    })->name('payment-requests.update');
+
+    Route::delete('/payment-requests/{paymentRequest}', function (PaymentRequest $paymentRequest) {
+        if ($paymentRequest->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $paymentRequest->delete();
+
+        return redirect()->route('payment-requests.index')
+            ->with('success', 'Payment request deleted successfully.');
+    })->name('payment-requests.destroy');
 });
 
 require __DIR__ . '/auth.php';
